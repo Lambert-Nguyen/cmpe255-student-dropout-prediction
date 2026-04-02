@@ -9,7 +9,7 @@ A data mining project that applies classification and clustering techniques to p
 | Name | SJSU ID |
 |------|---------|
 | Lam | 018229432 |
-| Tri Ngo | |
+| Tri Ngo | 015712749 |
 
 ## Problem Statement
 
