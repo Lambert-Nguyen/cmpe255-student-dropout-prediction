@@ -8,7 +8,7 @@ A data mining project that applies classification and clustering techniques to p
 
 | Name | SJSU ID |
 |------|---------|
-| Lam | 018229432 |
+| Lam Nguyen| 018229432 |
 | Tri Ngo | 015712749 |
 
 ## Problem Statement
@@ -84,7 +84,7 @@ Higher education dropout is a significant challenge for students and institution
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/CMPE255-Student-Dropout-Prediction.git
+git clone https://github.com/Lambert-Nguyen/cmpe255-student-dropout-prediction.git
 cd CMPE255-Student-Dropout-Prediction
 ```
 
