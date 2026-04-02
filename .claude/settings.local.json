@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(/Users/duylam1407/anaconda3/bin/pip install:*)",
+      "Bash(/Users/duylam1407/anaconda3/bin/python -c \"import ucimlrepo, xgboost, mlxtend; print\\(''''all ok''''\\)\")",
+      "Bash(/Users/duylam1407/anaconda3/bin/jupyter nbconvert:*)",
+      "Bash(ls results/figures/*.png)",
+      "Bash(ls data/*.csv data/raw/*.csv)"
+    ]
+  }
+}
