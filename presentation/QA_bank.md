@@ -246,7 +246,13 @@ A: Grid-searched k = {3, 5, 7, 9, 11} on the test set; k=11 maximized accuracy. 
 A: No — the test set is stratified, preserving the natural distribution. Balancing the test set would inflate evaluation honesty for one class at the cost of realism.
 
 **Q8. What about per-class precision, not just recall?**
-A: Computed but not on this slide. For XGBoost: Dropout precision ≈ 0.78, Enrolled ≈ 0.55, Graduate ≈ 0.81. Available in the notebook.
+A: Computed but not on this slide. For XGBoost (from the confusion matrix): Dropout precision = 213/(213+37+14) = **0.807**, Enrolled = 71/(32+71+31) = **0.530**, Graduate = 397/(39+51+397) = **0.815**.
+
+**Q9. Why is F1-macro 0.706 when accuracy is 76.95% — shouldn't they match?**
+A: They measure different things on the same predictions. Accuracy = correct/total = 681/885 = 76.95% — every *sample* weighted equally, so the 442 Graduates dominate. F1-macro = average of per-class F1s = (0.777 + 0.485 + 0.855)/3 = 0.706 — every *class* weighted equally. The Enrolled class has F1 = 0.485 (precision 0.530 × recall 0.447) and that drags the macro average down. The gap between 76.95% and 0.706 is exactly the minority-class story we chose F1-macro to surface.
+
+**Q10. Why does F1-weighted (0.7634) land between F1-macro (0.706) and accuracy (0.770)?**
+A: F1-weighted weights each class F1 by its sample size, so Graduate (n=442) dominates — it's essentially "accuracy-shaped F1" and lands close to accuracy. F1-macro treats each class equally regardless of size, which is why it surfaces the Enrolled weakness.
 
 ---
 
