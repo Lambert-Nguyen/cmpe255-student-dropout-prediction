@@ -118,3 +118,8 @@ _To be updated after analysis._
 
 1. Realinho, V., Vieira Martins, M., Machado, J., & Baptista, L. (2021). *Predict Students' Dropout and Academic Success* [Dataset]. UCI Machine Learning Repository.
 2. Martins, M.V., Tolledo, D., Machado, J., Baptista, L.M.T., & Realinho, V. (2021). Early prediction of student's performance in higher education: a case study. *Trends and Applications in Information Systems and Technologies (WorldCIST 2021)*.
+
+
+cd cmpe255-student-dropout-prediction
+source venv/bin/activate
+deactivate
