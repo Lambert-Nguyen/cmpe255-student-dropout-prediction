@@ -203,7 +203,7 @@ A: Visual coherence across 19 slides. Same color = same outcome class throughout
 A: Methodology requirement (this is a course project) and a scientific habit — multiple models bound the achievable performance and let us see whether one approach is exploiting something the others miss.
 
 **Q2. Why those exact hyperparameters? Did you tune?**
-A: KNN's k was tuned by grid search (k=1..30, k=11 won). XGBoost params (n_estimators=200, max_depth=6, lr=0.1) are sensible defaults validated by CV; we did light tuning, not exhaustive — full tuning is in scope for follow-up work.
+A: KNN's k was tuned by grid search over k = {3, 5, 7, 9, 11}; k=11 maximized test accuracy. XGBoost params (n_estimators=200, max_depth=6, lr=0.1) are sensible defaults validated by CV; we did light tuning, not exhaustive — full tuning is in scope for follow-up work.
 
 **Q3. Why max_depth=10 for Decision Tree?**
 A: Trade-off between bias and variance. Below 10, underfitting (CV F1 < 0.6); above, overfitting (gap between train and test grows). 10 was the elbow.
@@ -240,7 +240,7 @@ A: Yes, with class weights or threshold tuning — but at the cost of Dropout/Gr
 A: Curse of dimensionality. With 36 features, distance becomes less informative; nearest neighbors are nearly equidistant.
 
 **Q6. Why pick k=11 specifically?**
-A: Grid-searched k=1..30 on validation. k=11 maximized validation F1-macro. Below 11 → noisy decisions; above → over-smoothing into the majority class.
+A: Grid-searched k = {3, 5, 7, 9, 11} on the test set; k=11 maximized accuracy. Lower k → noisier decisions; we capped at 11 because the curve had already plateaued and higher k would over-smooth into the majority Graduate class. The selection plot is `results/figures/knn_k_selection.png`.
 
 **Q7. Did you balance the test set?**
 A: No — the test set is stratified, preserving the natural distribution. Balancing the test set would inflate evaluation honesty for one class at the cost of realism.
