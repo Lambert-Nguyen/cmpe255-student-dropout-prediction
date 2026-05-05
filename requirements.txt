@@ -1,6 +1,6 @@
 # Data handling
 pandas>=2.0.0
-numpy>=1.24.0
+numpy>=1.24.0,<2
 ucimlrepo>=0.0.3
 
 # Visualization
@@ -14,7 +14,7 @@ xgboost>=2.0.0
 imbalanced-learn>=0.11.0
 
 # Association Rules
-mlxtend>=0.23.0
+mlxtend>=0.23.0,<0.24
 
 # Clustering
 scipy>=1.11.0
