@@ -160,6 +160,84 @@ A: Older entrants often work, have families, or returned to school after gaps �
 **Q7. Tuition fees up to date is +0.40 — that's almost as strong as a grade. Surprising?**
 A: It surprised us too. Likely partly causal (financial stress drives dropout) and partly indicator (students disengaging stop paying). Either way it's a powerful signal.
 
+### KDE chart (left side of the slide)
+
+**Q8. What are the four KDE plots showing?**
+A: A 2×2 grid of feature distributions, each broken out by the three outcome classes (red=Dropout, orange=Enrolled, green=Graduate):
+- **Top-left:** Curricular units 1st sem (approved) — number of courses passed in semester 1.
+- **Top-right:** Curricular units 2nd sem (approved) — same for semester 2.
+- **Bottom-left:** Admission grade — the score the university accepted them on (0–200 scale).
+- **Bottom-right:** Age at enrollment — in years.
+
+The top two show clear class separation (dropouts pile at zero); the bottom two are deliberately included as *contrast* — admission grade overlaps for all three classes (weak signal), and age has a heavier dropout tail to the right (older entrants drop out more).
+
+**Q9. Why these four features specifically?**
+A: We picked the two strongest predictors (1st & 2nd sem approved units, ρ = 0.59 and 0.65) plus two weaker ones for contrast — admission grade (ρ = 0.12, weak) and age (ρ = −0.29, weak-to-moderate negative). The contrast shows the audience that not every feature separates the classes — the strong-signal features really stand out next to the weak ones.
+
+**Q10. What is KDE? Why use it instead of a histogram?**
+A: KDE = Kernel Density Estimation. It places a small Gaussian "bump" on each data point and sums them to produce a smooth density curve, instead of binning into discrete bars. We use it because:
+- Smooth curves let three classes overlay cleanly without bar-stacking confusion.
+- Shape comparison (bimodal vs unimodal, where the peak sits) is easier on smoothed curves.
+- We still overlay a faint histogram behind each KDE so the audience can see the raw bins.
+
+**Q11. The y-axis says "Density" — why does it go above 1?**
+A: Density is a *rate*, not a probability. It integrates to 1 over the support of the feature, so peak height can exceed 1 if the support is narrow. On the top-left (1st sem approved units) the peak hits ~0.5; on the bottom-left (admission grade), it's ~0.035 because the grade ranges over a wider 0–200 scale.
+
+**Q12. Why does the KDE curve extend below zero on the x-axis (e.g., approved units = −5)?**
+A: Smoothing artifact. The Gaussian kernel has tails on both sides of every data point, so when many points sit at 0 the smoothed curve bleeds slightly to the left of zero. Real values are integers ≥ 0; we don't read meaning into the negative tail. Same effect at the upper end of admission grade.
+
+**Q13. What's the histogram bars behind the KDE curves for?**
+A: Transparency — the KDE is a *model* of the density, the histogram is the raw data. Showing both lets the audience verify the smoothed shape matches the actual bin counts. We use `alpha=0.15` so it doesn't compete visually with the KDE line.
+
+**Q14. Why is admission grade in this chart if it's such a weak predictor?**
+A: As a deliberate counter-example. The top two KDEs separate cleanly; admission grade overlaps almost completely. That contrast tells the audience the feature ranking on the right side of the slide is *real signal*, not an artifact of every feature looking similar.
+
+### Spearman ρ table (right side of the slide)
+
+**Q15. What is ρ (rho)?**
+A: ρ is the lowercase Greek letter "rho" — the standard mathematical symbol for the **Spearman rank correlation coefficient**. It measures the strength and direction of a *monotonic* relationship between two variables, on a scale from −1 to +1:
+- **+1**: perfect positive monotonic — when one goes up, the other always goes up.
+- **0**: no monotonic relationship.
+- **−1**: perfect negative monotonic.
+
+Computed by ranking the values first (1, 2, 3, ...) then computing Pearson's correlation on the ranks. That's why it captures any always-increasing or always-decreasing relationship, not only straight-line ones.
+
+**Q16. What does the sign of ρ mean in our table?**
+A: We encoded the target as Dropout=0, Enrolled=1, Graduate=2 (ordered by "successful outcome").
+- **Positive ρ** (e.g., +0.65 for 2nd-sem approved): more of the feature → higher outcome class → more likely to graduate.
+- **Negative ρ** (e.g., −0.29 for age): more of the feature → lower outcome class → more likely to drop out.
+
+So all the green (positive) bars in our chart are pro-graduation features; the red (negative) bars are pro-dropout features.
+
+**Q17. Why is 2nd-sem approved (+0.65) higher than 1st-sem approved (+0.59)?**
+A: Two reasons. First, attrition — by semester 2, the most disengaged students have already accumulated zero approved units, so the contrast between dropouts and the rest sharpens. Second, academic momentum — students who survived semester 1 tend to keep performing in semester 2, while those who didn't keep falling behind. Together this widens the rank gap between classes in semester 2.
+
+**Q18. Why is "approved units" higher than "grade"?**
+A: Because *approved units* captures both performance AND engagement (you can only approve a course if you sat the exam), while *grade* only captures performance among courses attempted. A student who skipped half their courses has low approved units but possibly normal average grade on the few they took. Approved units is the stricter dropout signal.
+
+**Q19. Are these correlations statistically significant?**
+A: Yes — at n=4,424, even a ρ of 0.05 is statistically significant (p < 0.001). At ρ = 0.65 the p-value is essentially zero. Statistical significance isn't the question with a sample this large; *practical magnitude* is what matters, which is why we rank by |ρ| not by p-value.
+
+**Q20. Admission grade is only +0.12 — how can a major academic feature be so weak?**
+A: Because admission grade is recorded *before* enrollment and doesn't reflect what happens during the program. Two students with the same admission grade can diverge wildly based on motivation, life circumstances, finances, etc. Dropout is driven primarily by what happens *after* admission — which is exactly why semester performance dominates the ranking. This finding has practical implications: admissions filtering is a weak lever for retention; mid-program intervention is the strong one.
+
+**Q21. The top features look highly correlated with each other (1st & 2nd sem approved & grade) — isn't that multicollinearity?**
+A: Yes, they're correlated (~0.6–0.85 with each other, visible on the slide 10 heatmap). For *univariate ranking* like this Spearman table, multicollinearity doesn't matter — we're measuring each feature's relationship with the target independently. It does matter for **Linear/Logistic Regression** (inflates coefficient variance), which is why we don't read individual LR coefficients. Tree-based models (RF, XGBoost) handle it natively. Feature importance on slide 16 splits the credit across the correlated group rather than concentrating it.
+
+**Q22. Why Top 9 specifically — not Top 10 or all 36?**
+A: Cutoff for slide readability. Below |ρ| ≈ 0.10 the relationships are statistically present (n=4,424 makes everything significant) but practically uninformative. The 9th feature on the list (admission grade at +0.12) is already at the edge of meaningful signal — anything past it would just clutter the table.
+
+**Q23. Could you have used Pearson, Kendall's tau, or mutual information instead?**
+A: Yes, all three would work, with trade-offs:
+- **Pearson** assumes linearity — would understate non-linear relationships.
+- **Kendall's tau** is also rank-based but more conservative; gives smaller numbers but the *ranking* of features comes out almost identical to Spearman.
+- **Mutual information** is non-parametric and captures arbitrary dependencies, but loses sign and the values aren't bounded to [−1, 1].
+
+For an interpretable summary table on a slide, signed Spearman is the right pick.
+
+**Q24. The slide subtitle says "Approved curricular units separate the classes" — what does *separate* mean here?**
+A: That if you took the value of "approved units" alone, you could draw a threshold (e.g., < 3 units) and split most dropouts onto one side and most graduates onto the other with relatively few mistakes. Visually, the KDE curves for Dropout vs Graduate barely overlap — that's the visual definition of *separation*. Compare to admission grade where the curves nearly coincide — that's *non-separation*.
+
 ---
 
 ## Slide 9 — EDA · Three Lenses
