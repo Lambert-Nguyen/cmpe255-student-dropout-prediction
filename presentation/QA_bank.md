@@ -184,6 +184,51 @@ A: `notebooks/02_eda_visualization.ipynb` **cell 11** (section "### 4a. Five-Num
 
 Full table for both semesters (with whiskers and outlier counts) is in `presentation/Graphs_and_Code_Prep.md`.
 
+**Q4b. Explain a boxplot — what does each part of the box mean?**
+A: A boxplot compresses a distribution into the **5-number summary** plus outliers.
+- **Bottom edge of box** = Q1 (25th percentile) — 25% of values fall below.
+- **Line inside box** = Median (Q2, 50th percentile) — half the data on each side.
+- **Top edge of box** = Q3 (75th percentile) — 75% of values fall below.
+- **Box height** = IQR = Q3 − Q1 — spread of the middle 50%.
+- **Whiskers** = the most extreme value still within 1.5·IQR of the box (Tukey rule).
+- **Circles outside whiskers** = outliers, plotted individually.
+
+**Q4c. Read me the 5-number summary for [class] / [semester].**
+A: All values rounded to 2 d.p., from `data/raw/data.csv`.
+
+*1st semester grade:*
+- Graduate (n=2,209): min 0, Q1 12.12, median 13.00, Q3 13.86, max 18.88, IQR 1.74.
+- Enrolled (n=794): min 0, Q1 11.00, median 12.00, Q3 12.86, max 17.00, IQR 1.86.
+- Dropout (n=1,421): min 0, Q1 0.00, median 10.93, Q3 12.20, max 18.00, IQR 12.20.
+
+*2nd semester grade:*
+- Graduate (n=2,209): min 0, Q1 12.17, median 13.00, Q3 14.00, max 18.57, IQR 1.83.
+- Enrolled (n=794): min 0, Q1 11.00, median 12.00, Q3 12.82, max 17.60, IQR 1.82.
+- Dropout (n=1,421): min 0, **Q1 = median = 0**, Q3 11.83, max 17.71, IQR 11.83.
+
+**Q4d. Why does the Dropout box look weird — the median line sits at the bottom edge?**
+A: Because **median = Q1 = 0** for Dropout in 2nd semester. More than half of the 1,421 dropouts had stopped attending and recorded a zero grade, so the median line coincides with the bottom edge of the box. It's not a rendering bug — it's the strongest visual evidence in the deck of what dropout actually looks like in our data: an *attendance* failure by semester 2, not a *grading* failure.
+
+In 1st semester the same effect is weaker — Q1 = 0 (a quarter of dropouts had already given up by semester 1) but the median climbs to 10.93 because most still attended that first term.
+
+**Q4e. What's a whisker, and how is it computed?**
+A: Seaborn's default = Tukey's 1.5·IQR fence:
+- Lower whisker = max(min, Q1 − 1.5·IQR)
+- Upper whisker = min(max, Q3 + 1.5·IQR)
+
+Anything beyond that fence is plotted as an individual outlier circle. The whisker is **not** the absolute min/max — it's the most extreme value that's still inside the fence.
+
+**Q4f. Why are there so many outlier circles on Enrolled and Graduate but none on Dropout?**
+A: The Tukey fence is computed *per box*, and the IQR drives its width.
+- Enrolled and Graduate have tight IQRs (~1.8), so the lower fence sits around grade 10. Students who scored 0 fall way outside it and get plotted as circles. Counts: 71 outliers below Enrolled 1st sem, 77 below Graduate 1st sem, 68 below Enrolled 2nd sem, 75 below Graduate 2nd sem.
+- Dropout's IQR is huge (~12), so the lower fence is below zero — no real value falls outside it, so no outliers are drawn. Same data, same Tukey rule, different geometry.
+
+**Q4g. What does box *height* (IQR) mean intuitively?**
+A: A short box = a consistent class — most students cluster around the median. A tall box = high internal variability. Graduate's IQR ≈ 1.74 → graduates are predictable. Dropout's IQR ≈ 12.2 → dropouts are heterogeneous: some leave with passing grades, some with zeros.
+
+**Q4h. Did you remove outliers from the boxplot?**
+A: No. Every outlier circle is a real student record — students who scored zero but stayed enrolled, or eventually graduated despite a poor semester. Removing them would bias the comparison and hide the long tail in the Enrolled/Graduate classes.
+
 **Q5. Why "moderate but imperfect class separability" — define moderate?**
 A: We can see clusters in PCA but the borders overlap. K-Means silhouette of 0.21 (slide 13) puts a number on it: weak separation.
 
