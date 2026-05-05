@@ -176,6 +176,14 @@ A: Approximately 25–30% (typical for diverse-feature tabular data). The chart 
 **Q4. The boxplots — why three boxes per semester instead of one figure?**
 A: Each box is one outcome class. Three side by side per semester let the audience eyeball median/IQR shifts at a glance.
 
+**Q4a. Where's the 5-number summary code? Show me the numbers behind the boxplot.**
+A: `notebooks/02_eda_visualization.ipynb` **cell 11** (section "### 4a. Five-Number Summary backing the Boxplot"). Uses pandas `.describe()` grouped by Target, plus explicit Tukey 1.5·IQR whisker and outlier counts. Output:
+- Dropout 2nd sem (most-asked): min 0, Q1 0, **median 0**, Q3 11.83, max 17.71 — median = Q1 = 0 because more than half of dropouts received zero in semester 2.
+- Enrolled 2nd sem: min 0, Q1 11.00, median 12.00, Q3 12.82, max 17.60.
+- Graduate 2nd sem: min 0, Q1 12.17, median 13.00, Q3 14.00, max 18.57.
+
+Full table for both semesters (with whiskers and outlier counts) is in `presentation/Graphs_and_Code_Prep.md`.
+
 **Q5. Why "moderate but imperfect class separability" — define moderate?**
 A: We can see clusters in PCA but the borders overlap. K-Means silhouette of 0.21 (slide 13) puts a number on it: weak separation.
 

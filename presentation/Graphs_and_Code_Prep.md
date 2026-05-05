@@ -12,17 +12,20 @@ For each graph in the deck: what slide, what notebook + cell to open live, the 1
 
 | # | Slide | Graph | Source notebook → cell | Saved file |
 |---|-------|-------|------------------------|------------|
-| 1 | 8     | KDE — feature distributions (4 panels) | `02_eda_visualization.ipynb` cell 7 | `results/figures/feature_distributions.png` |
-| 2 | 9 (left)   | **Boxplots — semester grades by outcome** | `02_eda_visualization.ipynb` cell 9 | `results/figures/boxplots_grades.png` |
-| 3 | 9 (mid)    | Stacked bars — outcome by financial factor | `02_eda_visualization.ipynb` cell 13 | `results/figures/stacked_bar_binary.png` |
-| 4 | 9 (right)  | PCA 2D scatter | `02_eda_visualization.ipynb` cell 15 | `results/figures/pca_scatter.png` |
-| 5 | 10 (toolkit thumbnail) | Correlation heatmap (36×36) | `02_eda_visualization.ipynb` cell 5 | `results/figures/correlation_heatmap.png` |
-| 6 | 10 (toolkit thumbnail) | RF feature importance — top 15 | `03_modeling_evaluation.ipynb` cell 5 | `results/figures/rf_feature_importance.png` |
+| 1 | 8     | KDE — feature distributions (4 panels) | `02_eda_visualization.ipynb` **cell 7** | `results/figures/feature_distributions.png` |
+| 2 | 9 (left)   | **Boxplots — semester grades by outcome** | `02_eda_visualization.ipynb` **cell 9** | `results/figures/boxplots_grades.png` |
+| 2a | 9 (left, backing data) | **5-number summary table for the boxplot** *(added by us)* | `02_eda_visualization.ipynb` **cell 11** | (printed output, not saved) |
+| 3 | 9 (mid)    | Stacked bars — outcome by financial factor | `02_eda_visualization.ipynb` **cell 15** | `results/figures/stacked_bar_binary.png` |
+| 4 | 9 (right)  | PCA 2D scatter | `02_eda_visualization.ipynb` **cell 17** | `results/figures/pca_scatter.png` |
+| 5 | 10 (toolkit thumbnail) | Correlation heatmap (36×36) | `02_eda_visualization.ipynb` **cell 5** | `results/figures/correlation_heatmap.png` |
+| 6 | 10 (toolkit thumbnail) | RF feature importance — top 15 | `03_modeling_evaluation.ipynb` **cell 5** | `results/figures/rf_feature_importance.png` |
 | 7 | 10 (toolkit thumbnails) | Re-uses #1, #2, #3, #4 | (same as above) | (same) |
-| 8 | 12 (left) | Confusion matrix — XGBoost | `03_modeling_evaluation.ipynb` cell 13 | `results/figures/xgb_cm.png` |
-| 9 | 12 (mid)  | Confusion matrix — Logistic Regression | `03_modeling_evaluation.ipynb` cell 9 | `results/figures/lr_cm.png` |
-| 10 | 12 (right)| Confusion matrix — KNN (k=11) | `03_modeling_evaluation.ipynb` cell 7 | `results/figures/knn_cm.png` |
-| 11 | 13 | K-Means cluster vs label crosstab heatmap | `03_modeling_evaluation.ipynb` cell 14 | `results/figures/kmeans_crosstab.png` |
+| 8 | 12 (left) | Confusion matrix — XGBoost | `03_modeling_evaluation.ipynb` **cell 13** | `results/figures/xgb_cm.png` |
+| 9 | 12 (mid)  | Confusion matrix — Logistic Regression | `03_modeling_evaluation.ipynb` **cell 9** | `results/figures/lr_cm.png` |
+| 10 | 12 (right)| Confusion matrix — KNN (k=11) | `03_modeling_evaluation.ipynb` **cell 7** | `results/figures/knn_cm.png` |
+| 11 | 13 | K-Means cluster vs label crosstab heatmap | `03_modeling_evaluation.ipynb` **cell 14** | `results/figures/kmeans_crosstab.png` |
+
+> ⚠️ **Cell numbering note.** We inserted a new markdown+code pair (cells 10 & 11) for the 5-number summary right after the boxplot cell. That shifted every later cell in `02_eda_visualization.ipynb` by +2: violin is now cell 13 (was 11), stacked bars cell 15 (was 13), PCA cell 17 (was 15), Spearman top-15 cell 19 (was 17). The numbers in this guide reflect the **new** layout.
 
 > Slide 10 ("Visualization Toolkit") is a montage — the six thumbnails are the same files used elsewhere; opening any one of the source cells covers it.
 
@@ -112,8 +115,42 @@ sns.boxplot(data=df, x='Target', y='Curricular units 2nd sem (grade)',
 ```
 **Narration:** "Standard seaborn boxplot — Tukey-style 5-number summary. Whiskers extend to the most extreme point within 1.5·IQR; circles beyond that are outliers. Same color palette as elsewhere in the deck."
 
+### Graph 2a — Five-number summary table (slide 9 left, backing data) ⭐
+**Notebook:** `02_eda_visualization.ipynb` → **cell 11** *(immediately below the boxplot — section header "### 4a. Five-Number Summary backing the Boxplot")*
+```python
+for sem_col in ['Curricular units 1st sem (grade)',
+                'Curricular units 2nd sem (grade)']:
+    summary = (df.groupby('Target')[sem_col]
+                 .describe()[['count','min','25%','50%','75%','max']]
+                 .rename(columns={'25%':'Q1','50%':'median','75%':'Q3'})
+                 .reindex(ORDER).round(2))
+    summary['IQR'] = summary['Q3'] - summary['Q1']
+
+    # Tukey 1.5·IQR whiskers + outlier counts
+    whisker_lo, whisker_hi, n_out_lo, n_out_hi = [], [], [], []
+    for cls in ORDER:
+        vals = df.loc[df['Target'] == cls, sem_col].dropna()
+        q1, q3 = vals.quantile([0.25, 0.75])
+        iqr = q3 - q1
+        lo_fence, hi_fence = q1 - 1.5*iqr, q3 + 1.5*iqr
+        within = vals[(vals >= lo_fence) & (vals <= hi_fence)]
+        whisker_lo.append(round(within.min(), 2))
+        whisker_hi.append(round(within.max(), 2))
+        n_out_lo.append(int((vals < lo_fence).sum()))
+        n_out_hi.append(int((vals > hi_fence).sum()))
+    summary[['whisker_lo','whisker_hi','outliers_lo','outliers_hi']] = \
+        list(zip(whisker_lo, whisker_hi, n_out_lo, n_out_hi))
+    print(summary.to_string())
+```
+
+**Why this cell exists:** the original notebook only drew the boxplot — it never extracted the 5-number summary numerically. We added this cell specifically so we can satisfy the professor's "boxplot must have 5-number summary" requirement with explicit code, not just a chart.
+
+**Narration:** "Pandas `.describe()` gives us min/Q1/median/Q3/max in one call. We rename the percentile columns to Q1/median/Q3 for readability and add IQR. Then per class we compute the Tukey 1.5·IQR fences and report the actual whisker positions plus outlier counts above and below. The output backs every number on the boxplot."
+
+**Cued line for the demo:** "If you want the explicit 5-number summary the boxplot is drawing, here it is." → run cell 11 → output appears in <1 second showing the full table for both semesters.
+
 ### Graph 3 — Stacked bar charts (slide 9 middle)
-**Notebook:** `02_eda_visualization.ipynb` → **cell 13**
+**Notebook:** `02_eda_visualization.ipynb` → **cell 15**
 ```python
 binary_features = ['Scholarship holder', 'Debtor', 'Tuition fees up to date']
 for ax, feat in zip(axes, binary_features):
@@ -123,7 +160,7 @@ for ax, feat in zip(axes, binary_features):
 **Narration:** "For each binary feature we cross-tabulate against Target and normalize across rows — every bar sums to 1.0. So we're comparing class proportions, not raw counts. Three subplots, one per binary."
 
 ### Graph 4 — PCA scatter (slide 9 right)
-**Notebook:** `02_eda_visualization.ipynb` → **cell 15**
+**Notebook:** `02_eda_visualization.ipynb` → **cell 17**
 ```python
 X_pca_input = StandardScaler().fit_transform(df.drop(columns=drop_cols))
 pca = PCA(n_components=2, random_state=42)
@@ -231,15 +268,19 @@ sns.heatmap(ct, annot=True, fmt='d', cmap='YlOrRd', ax=ax)
 If the professor says "show me the code," do this in order:
 
 1. **Open `notebooks/02_eda_visualization.ipynb`** — scroll to **cell 9 (boxplot)**.
-   - Run it live if possible (3 seconds).
-   - Point at the 5-number summary table from this guide if asked for exact numbers.
-2. **Scroll to cell 15 (PCA)** — show the line `pca.explained_variance_ratio_` and read out 17.7% + 9.5%.
-3. **Open `notebooks/03_modeling_evaluation.ipynb`** — scroll to **cell 13 (XGBoost)**.
+   - Run it live if possible (3 seconds). Chart appears.
+2. **Immediately below, run cell 11 (5-number summary)** ⭐ — this is the cell we added specifically for the professor's "boxplot must have 5-number summary" requirement.
+   - One-line cue: *"And here's the explicit 5-number summary the boxplot is built from."*
+   - Point at the **Dropout 2nd-sem row** — median 0, Q1 0 — call out *"more than half the dropouts had a zero grade in semester 2; that's why the median line sits on the bottom edge of the box."*
+3. **Scroll to cell 17 (PCA)** — show the line `pca.explained_variance_ratio_` and read out 17.7% + 9.5%.
+4. **Open `notebooks/03_modeling_evaluation.ipynb`** — scroll to **cell 13 (XGBoost)**.
    - Show the confusion-matrix code block.
    - Then scroll to **cell 22 (RF vs XGB feature importance)** for the side-by-side bars on slide 16.
-4. **Wrap with cell 14 (K-Means)** to show the silhouette computation backing slide 13.
+5. **Wrap with cell 14 (K-Means)** to show the silhouette computation backing slide 13.
 
-Total: ~4 cells across 2 notebooks, all under 30 lines each.
+Total: ~5 cells across 2 notebooks, all under 30 lines each.
+
+> 💡 **Bake the outputs in advance.** Run `jupyter nbconvert --to notebook --execute --inplace notebooks/02_eda_visualization.ipynb` once before the talk so cell 11's table is already rendered in the saved `.ipynb`. Then even if a kernel won't start, scrolling to cell 11 still shows the numbers.
 
 ---
 
@@ -248,6 +289,8 @@ Total: ~4 cells across 2 notebooks, all under 30 lines each.
 - [ ] Open both notebooks (`02_eda_visualization.ipynb`, `03_modeling_evaluation.ipynb`) in tabs.
 - [ ] Have `results/figures/` open in a file browser as a fallback.
 - [ ] Have `data/raw/data.csv` accessible — quick `pd.read_csv` + `.describe()` on demand.
+- [ ] **Bookmark cell 11 of `02_eda_visualization.ipynb`** — the new 5-number-summary cell. This is the cell you point to when the professor says "boxplots must have 5-number summary."
+- [ ] Run the notebook end-to-end once (`jupyter nbconvert --to notebook --execute --inplace notebooks/02_eda_visualization.ipynb`) so cell 11's output is baked into the file even if the kernel doesn't start during the demo.
 - [ ] Memorize the 5-number summary for **Dropout 2nd sem** (the weird one): min 0, Q1 0, **median 0**, Q3 11.83, max 17.71. This is the most likely target of an "explain this box" question.
 - [ ] Memorize PC1 17.7% / PC2 9.5% / total 27.2%.
 - [ ] Memorize "Tukey 1.5·IQR" for the whisker question.
