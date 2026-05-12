@@ -1,0 +1,49 @@
+===============================================================================
+CMPE 255 Project Submission: Student Dropout Prediction
+===============================================================================
+
+Team: Lam Nguyen (018229432) & Tri Ngo (015712749)
+
+Project Repository:
+https://github.com/Lambert-Nguyen/cmpe255-student-dropout-prediction
+
+===============================================================================
+SUBMISSION CONTENTS
+===============================================================================
+
+📊 PRESENTATION
+- Final_CMPE255_Student_Dropout_Prediction.pptx (main slide deck)
+
+📓 NOTEBOOKS (Demo - Run in order)
+1. 01_data_preprocessing.ipynb (data cleaning & preparation)
+2. 02_eda_visualization.ipynb (exploratory analysis & visualizations)
+3. 03_modeling_evaluation.ipynb (classification, clustering, evaluation)
+
+💻 SOURCE CODE
+- utils.py (reusable helper functions)
+
+📁 DATA
+- raw/data.csv (original UCI dataset)
+- Processed & split datasets (train/test/full with scaled/unscaled variants)
+
+📈 RESULTS
+- figures/ (30+ visualization outputs including confusion matrices, ROC curves, feature importance, etc.)
+- tables/model_comparison.csv (model performance metrics)
+
+📄 CONFIG FILES
+- README.md (full project documentation)
+- requirements.txt (Python dependencies)
+
+===============================================================================
+HOW TO RUN THE DEMO
+===============================================================================
+
+1. Clone or download the repository from the GitHub link above
+2. Install dependencies: pip install -r requirements.txt
+3. Open the notebooks in Jupyter, Google Colab, or VS Code
+4. Run notebooks 01 → 02 → 03 in sequence
+5. View generated figures in results/figures/
+
+All data files are included; no additional downloads needed (unless you prefer to pull from UCI directly).
+
+===============================================================================
